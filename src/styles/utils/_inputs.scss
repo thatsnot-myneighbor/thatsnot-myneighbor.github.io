@@ -8,7 +8,7 @@
   width: 100%;
   height: inputs.$height;
   padding: inputs.$padding;
-  border: var(--app-color-input-border);
+  border: 0;
   border-radius: inputs.$border-radius;
   background-color: var(--app-input-bg);
   box-shadow: inputs.$shadow;
@@ -17,6 +17,7 @@
   font-weight: inputs.$font-weight;
   line-height: inputs.$line-height;
   color: var(--app-color-input);
+  overflow: hidden;
 
   @include mixins.transition;
 

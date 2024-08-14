@@ -1,0 +1,59 @@
+@use "vars/mixins";
+
+.navbarToggler {
+  position: relative;
+  z-index: 20;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+  transition: .2s ease-in-out;
+  background-color: var(--app-color-accent);
+  border: 1px solid var(--app-color-accent);
+  border-radius: 15px;
+  padding: 0;
+
+  @include mixins.transition;
+
+  &[data-active=true] {
+    transform: translateX(-100%);
+
+    @media screen and (min-width: 420px){
+      transform: translateX(0);
+    }
+  }
+
+  @media screen and (min-width: 420px){
+    transform: translateX(0);
+  }
+
+  @media screen and (min-width: 1200px){
+    display: none;
+  }
+
+
+  &[disabled] {
+    svg {
+      fill: #fff;
+    }
+  }
+
+  svg {
+    fill: #fff;
+    transform: translateY(0);
+    transition: fill 0.5s;
+  }
+
+  &:focus,
+  &:hover {
+    background-color: var(--app-color-primary);
+    border-color: var(--app-color-primary);
+
+    svg {
+      fill: #fff;
+    }
+  }
+}

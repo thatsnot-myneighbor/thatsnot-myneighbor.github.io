@@ -1,6 +1,7 @@
 export interface IAppConfig {
     endpoint: string;
     seo: boolean;
+    postsPerPage?: number | false;
 }
 
 export interface IQueryData {

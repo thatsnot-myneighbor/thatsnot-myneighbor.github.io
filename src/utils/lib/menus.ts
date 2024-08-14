@@ -1,7 +1,7 @@
 // Interfaces
 import { IMenu, IMenuItem, IMenuItemsTree } from '@/utils/interfaces/menus';
 
-import { getApolloClient } from '@/utils/lib/apollo-client';
+import { getClient } from '@/utils/lib/apollo-client';
 import { getTopLevelPages } from '@/utils/lib/pages';
 import { QUERY_ALL_MENUS } from '@/utils/data/menus';
 import { IPage } from '../interfaces/pages';
@@ -13,7 +13,7 @@ export const MENU_LOCATION_NAVIGATION_DEFAULT = 'navmenu';
  */
 
 export async function getAllMenus() {
-    const apolloClient = getApolloClient();
+    const apolloClient = getClient();
 
     const data = await apolloClient.query({
         query: QUERY_ALL_MENUS,

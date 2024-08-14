@@ -1,17 +1,31 @@
-import Image from "next/image";
-import styles from "./page.module.css";
 import PostCard from "@/components/PostCard";
 import Pagination from "@/components/Pagination";
-import {getPaginatedPosts} from "@/utils/lib/posts";
+import {getPaginatedPosts, getTopPosts} from "@/utils/lib/posts";
 import Section from "@/components/Section";
+import {getPageByUri} from "@/utils/lib/pages";
+import TopGames from "@/components/TopGames";
+import ContentBox from "@/components/ContentBox";
 import {unstable_noStore} from "next/cache";
 
 export default async function Home() {
 
+  unstable_noStore();
+
+  const {topPosts} = await getTopPosts();
   const {posts, pagination} = await getPaginatedPosts();
+  const page = await getPageByUri('homepage');
+
+  if (!page) {
+    return {
+      props: {},
+      notFound: true,
+    };
+  }
 
   return (
     <div className="page">
+      {/*{topPosts && topPosts.length > 0 && (<TopGames posts={topPosts} />)}*/}
+
       <Section
         title="All games"
       >
@@ -32,6 +46,17 @@ export default async function Home() {
             basePath=''
           />
         )}
+      </Section>
+
+      <Section>
+        <ContentBox>
+          <div
+            className="content"
+            dangerouslySetInnerHTML={{
+              __html: page.content,
+            }}
+          />
+        </ContentBox>
       </Section>
     </div>
   );

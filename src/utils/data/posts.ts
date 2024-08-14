@@ -58,7 +58,7 @@ export const QUERY_ALL_POSTS = gql`
 export const QUERY_TOP_POSTS = gql`
   ${POST_FIELDS}
   query TopPosts {
-    posts(first: 10, where: {topMeta: 1}) {
+    posts(first: 20, where: {topMeta: 1}) {
       edges {
         node {
           ...PostFields

@@ -1,3 +1,6 @@
+@use "vars/base";
+@use "vars/mixins";
+
 .nav {
   position: relative;
   display: grid;
@@ -9,13 +12,17 @@
   }
 
   a {
-    color: var(--app-color-accent);
+    color: #fff;
     text-decoration: none;
     cursor: pointer;
     text-transform: uppercase;
+    background-color: var(--app-color-primary);
+    border-radius: base.$border-radius-base;
+
+    @include mixins.transition;
 
     &:hover {
-      color: var(--app-color-primary);
+      color: #fff;
       background-color: var(--app-color-accent);
     }
   }
@@ -48,9 +55,9 @@
   gap: 0.3em;
   align-items: center;
   justify-content: center;
-  line-height: 24px;
+  line-height: 1;
   background-color: var(--app-bg);
-  padding: 0.5em 1em;
+  padding: 1em 1.25em;
 }
 
 .active {

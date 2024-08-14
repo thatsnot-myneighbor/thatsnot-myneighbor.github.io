@@ -20,9 +20,6 @@ type TPaginationProps = {
 const Pagination = ({ pagesCount, currentPage, basePath, addCanonical = true }: TPaginationProps) => {
   const path = `${basePath}/page/`;
 
-  console.log(basePath);
-  console.log(path);
-
   const hasPreviousPage = pagesCount > 1 && currentPage > 1;
   const hasNextPage = pagesCount > 1 && currentPage < pagesCount;
 

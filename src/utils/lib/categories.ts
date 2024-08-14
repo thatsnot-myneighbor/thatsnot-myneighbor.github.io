@@ -1,5 +1,5 @@
 import appConfig from '@/utils/lib/config';
-import { getApolloClient } from '@/utils/lib/apollo-client';
+import { getClient } from '@/utils/lib/apollo-client';
 
 import { QUERY_ALL_CATEGORIES, QUERY_CATEGORY_BY_SLUG, QUERY_CATEGORY_SEO_BY_SLUG } from '@/utils/data/categories';
 import {ICategory} from "@/utils/interfaces/categories";
@@ -19,7 +19,7 @@ export function categoryPathBySlug(slug: string) {
  */
 
 export async function getAllCategories() {
-  const apolloClient = getApolloClient();
+  const apolloClient = getClient();
 
   const data = await apolloClient.query({
     query: QUERY_ALL_CATEGORIES,
@@ -34,7 +34,7 @@ export async function getAllCategories() {
  * Get category data by slug
  */
 export async function getCategoryBySlug(slug: string) {
-  const apolloClient = getApolloClient();
+  const apolloClient = getClient();
   const apiHost = new URL(appConfig.endpoint).host;
 
   let categoryData;

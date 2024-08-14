@@ -28,7 +28,7 @@ export interface ICsPostOptions {
 }
 
 export interface IPostCard {
-    databaseId: number;
+    postId: string;
     slug: string;
     title: string;
     categories: ICategoryCard[];
@@ -41,7 +41,7 @@ export interface IPostCard {
 }
 
 export interface IPost {
-    databaseId: number;
+    postId: string;
     slug: string;
     title: string;
     metaTitle: string;

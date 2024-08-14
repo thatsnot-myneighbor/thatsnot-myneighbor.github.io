@@ -21,6 +21,7 @@ import PostCard from '@/components/PostCard';
 import styles from './page.module.scss';
 import GameHead from "@/components/GameHead";
 import Player from "@/components/Player";
+import CommentForm from "@/components/CommentForm/CommentForm";
 
 export default async function Post({ params }: { params: { slug: string } }) {
 
@@ -37,7 +38,6 @@ export default async function Post({ params }: { params: { slug: string } }) {
     const { category: relatedCategory, posts: relatedPosts } =
     (await getRelatedPosts(post.categories, post.databaseId)) || {};
     const relatedPostsList = relatedPosts || {};
-    console.log(relatedPostsList)
 
     const isServer = typeof window === 'undefined' ? true : false;
 
@@ -103,6 +103,10 @@ export default async function Post({ params }: { params: { slug: string } }) {
                           ))}
                       </ul>
                     )}
+                </Section>
+
+                <Section id="comments" title="Comments">
+                    <CommentForm postID={post.postId} />
                 </Section>
 
                 <Section>

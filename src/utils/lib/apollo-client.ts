@@ -1,18 +1,23 @@
-import { ApolloClient, DefaultOptions, HttpLink, InMemoryCache } from '@apollo/client';
+import {
+  DefaultOptions,
+  HttpLink,
+} from '@apollo/client';
+
+import {
+  registerApolloClient,
+  InMemoryCache,
+  ApolloClient,
+} from "@apollo/experimental-nextjs-app-support";
 
 import { removeLastTrailingSlash } from '@/utils/helpers/functions';
-let client: ApolloClient<object>;
+import appConfig from "@/utils/lib/config";
 
 /**
  * getApolloClient
  */
 
-export function getApolloClient() {
-  if (!client) {
-    client = _createApolloClient();
-  }
-  return client;
-}
+export const { getClient, query, PreloadQuery } =
+  registerApolloClient(() => _createApolloClient());
 
 /**
  * createApolloClient
@@ -33,7 +38,7 @@ export function _createApolloClient() {
 
   return new ApolloClient({
     link: new HttpLink({
-      uri: removeLastTrailingSlash(process.env.WORDPRESS_GRAPHQL_ENDPOINT),
+      uri: removeLastTrailingSlash(appConfig.endpoint),
     }),
     cache: new InMemoryCache({
       typePolicies: {

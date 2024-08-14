@@ -61,10 +61,20 @@ const PostCard = ({post, options = {}}: { post: IPostCard, options?: {} }) => {
         >
           {title}
         </Link>
-          <div>
-            Likes: {post.likes.up}
-            Dislikes: {post.likes.down}
+        <div className="likes-info">
+          <div className="likes-info__item">
+            <svg className="icon" width="20px" height="20px">
+              <use href="#smile"></use>
+            </svg>
+            {post.likes.up}
           </div>
+          <div className="likes-info__item">
+            <svg className="icon" width="20px" height="20px">
+              <use href="#sad-smile"></use>
+            </svg>
+            {post.likes.down}
+          </div>
+        </div>
       </div>
     </div>
   );

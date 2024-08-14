@@ -1,4 +1,4 @@
-import { getApolloClient } from '@/utils/lib/apollo-client';
+import { getClient } from '@/utils/lib/apollo-client';
 
 import {
     QUERY_ALL_PAGES_INDEX,
@@ -7,6 +7,9 @@ import {
     QUERY_PAGE_BY_URI,
     QUERY_PAGE_SEO_BY_URI,
 } from '@/utils/data/pages';
+import {IPage} from "@/utils/interfaces/pages";
+import {IQueryData} from "@/utils/interfaces/commons";
+import appConfig from "@/utils/lib/config";
 
 /**
  * pagePathBySlug
@@ -20,12 +23,12 @@ export function pagePathBySlug(slug: string) {
  * getPageByUri
  */
 
-export async function getPageByUri(uri: string) {
+export async function getPageByUri(uri: string): Promise<IPage | false> {
     if (!process.env.WORDPRESS_GRAPHQL_ENDPOINT) {
         return false;
     }
 
-    const apolloClient = getApolloClient();
+    const apolloClient = getClient();
     const apiHost: string = new URL(process.env.WORDPRESS_GRAPHQL_ENDPOINT).host;
 
     let pageData;
@@ -38,19 +41,23 @@ export async function getPageByUri(uri: string) {
                 uri,
             },
         });
-    } catch (e) {
-        console.log(`[pages][getPageByUri] Failed to query page data: ${e.message}`);
-        throw e;
+    } catch (err) {
+        if (err instanceof Error) {
+            console.log(`[pages][getPageByUri] Failed to query page data: ${err.message}`);
+        }
+        throw err;
     }
 
-    if (!pageData?.data.page) return { page: undefined };
+    if (!pageData?.data.page) {
+        return false
+    };
 
     const page = [pageData?.data.page].map(mapPageData)[0];
 
     // If the SEO plugin is enabled, look up the data
     // and apply it to the default settings
 
-    if (process.env.WORDPRESS_PLUGIN_SEO === true) {
+    if (appConfig.seo === true) {
         try {
             seoData = await apolloClient.query({
                 query: QUERY_PAGE_SEO_BY_URI,
@@ -102,9 +109,7 @@ export async function getPageByUri(uri: string) {
         };
     }
 
-    return {
-        page,
-    };
+    return page;
 }
 
 /**
@@ -120,7 +125,7 @@ const allPagesIncludesTypes = {
 export async function getAllPages(options = {}) {
     const { queryIncludes = 'index' } = options;
 
-    const apolloClient = getApolloClient();
+    const apolloClient = getClient();
 
     const data = await apolloClient.query({
         query: allPagesIncludesTypes[queryIncludes],
@@ -149,27 +154,43 @@ export async function getTopLevelPages(options) {
 }
 
 /**
- * mapPageData
+ * Build single post data
  */
 
-export function mapPageData(page = {}) {
-    const data = { ...page };
+export function mapPageData(pageData: IQueryData = {}): IPage {
+    const {
+        databaseId,
+        slug,
+        title,
+        content,
+        parent,
+        children,
+        featuredImage,
+    } = pageData;
 
-    if (data.featuredImage) {
-        data.featuredImage = data.featuredImage.node;
+    const page: IPage = {
+        pageId: databaseId,
+        slug: slug,
+        title: title,
+        content: content,
+        children: children,
+        parent: parent,
     }
 
-    if (data.parent) {
-        data.parent = data.parent.node;
+    if (pageData.featuredImage) {
+        page.featuredImage = featuredImage.node;
     }
 
-    if (data.children) {
-        data.children = data.children.edges.map(({ node }) => node);
+    if (pageData.parent) {
+        page.parent = pageData.parent.node;
     }
 
-    return data;
+    if (pageData.children) {
+        page.children = pageData.children.edges.map(({ node }) => node);
+    }
+
+    return page;
 }
-
 /**
  * getBreadcrumbsByUri
  */

@@ -1,9 +1,9 @@
-import { getApolloClient } from '@/utils/lib/apollo-client';
+import { getClient } from '@/utils/lib/apollo-client';
 import { QUERY_SITE_DATA, QUERY_SITE_SETTINGS, QUERY_SEO_DATA } from '@/utils/data/site';
 import { ISiteOptions } from '../interfaces/siteoptions';
 
 export async function getSiteoptions(): Promise<ISiteOptions> {
-    const apolloClient = getApolloClient();
+    const apolloClient = getClient();
 
     let siteData;
     let siteSettings;

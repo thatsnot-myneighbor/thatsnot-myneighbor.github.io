@@ -21,7 +21,7 @@
   --app-color-link-hover: #{colors.$white};
 
   // Inputs
-  --app-color-input: inputs.$color-input;
-  --app-color-input-border: inputs.$color-border;
-  --app-input-bg: #fff;
+  --app-color-input: #{inputs.$color-input};
+  --app-color-input-border: #{inputs.$color-border};
+  --app-input-bg: #{color.adjust(#fff, $lightness: -10%)};
 }

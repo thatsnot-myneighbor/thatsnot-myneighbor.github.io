@@ -1,4 +1,4 @@
-import {getApolloClient} from '@/utils/lib/apollo-client';
+import {getClient} from '@/utils/lib/apollo-client';
 import {sortObjectsByDate} from '@/utils/helpers/datetime';
 
 import {
@@ -15,6 +15,9 @@ import {
 import {IPost, IPostCard} from "@/utils/interfaces/posts";
 import {unstable_noStore} from "next/cache";
 import {IQueryData} from "@/utils/interfaces/commons";
+import appConfig from "@/utils/lib/config";
+import {ICategoryCard} from "@/utils/interfaces/categories";
+import {mapCategoryData} from "@/utils/lib/categories";
 
 /**
  * postPathBySlug
@@ -29,8 +32,8 @@ export function postPathBySlug(slug: string) {
  */
 
 export async function getPostBySlug(slug: string) {
-  const apolloClient = getApolloClient();
-  const apiHost = new URL(process.env.WORDPRESS_GRAPHQL_ENDPOINT).host;
+  const apolloClient = getClient();
+  const apiHost = new URL(appConfig.endpoint).host;
 
   let postData;
   let seoData;
@@ -42,9 +45,11 @@ export async function getPostBySlug(slug: string) {
         slug,
       },
     });
-  } catch (e) {
-    console.log(`[posts][getPostBySlug] Failed to query post data: ${e.message}`);
-    throw e;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      console.log(`[posts][getPostBySlug] Failed to query post data: ${err.message}`);
+    }
+    throw err;
   }
 
   if (!postData?.data.post) return {post: undefined};
@@ -54,7 +59,7 @@ export async function getPostBySlug(slug: string) {
   // If the SEO plugin is enabled, look up the data
   // and apply it to the default settings
 
-  if (process.env.WORDPRESS_PLUGIN_SEO === true) {
+  if (appConfig.seo) {
     try {
       seoData = await apolloClient.query({
         query: QUERY_POST_SEO_BY_SLUG,
@@ -62,10 +67,12 @@ export async function getPostBySlug(slug: string) {
           slug,
         },
       });
-    } catch (e) {
-      console.log(`[posts][getPostBySlug] Failed to query SEO plugin: ${e.message}`);
-      console.log('Is the SEO Plugin installed? If not, disable WORDPRESS_PLUGIN_SEO in next.config.js.');
-      throw e;
+    } catch (err) {
+      if (err instanceof Error) {
+        console.log(`[posts][getPostBySlug] Failed to query SEO plugin: ${err.message}`);
+        console.log('Is the SEO Plugin installed? If not, disable WORDPRESS_PLUGIN_SEO in next.config.js.');
+      }
+      throw err;
     }
 
     const {seo = {}} = seoData?.data?.post || {};
@@ -118,7 +125,7 @@ export async function getPostBySlug(slug: string) {
 }
 
 export async function getAllPosts(options = {}) {
-  const apolloClient = getApolloClient();
+  const apolloClient = getClient();
 
   const data = await apolloClient.query({
     query: QUERY_ALL_POSTS,
@@ -138,7 +145,7 @@ export async function getAllPosts(options = {}) {
  */
 
 export async function getTopPosts() {
-  const apolloClient = getApolloClient();
+  const apolloClient = getClient();
 
   const data = await apolloClient.query({
     query: QUERY_TOP_POSTS,
@@ -147,7 +154,7 @@ export async function getTopPosts() {
   const posts = data?.data.posts.edges.map(({node = {}}) => node);
 
   return {
-    topPosts: Array.isArray(posts) && posts.map(mapPostData),
+    topPosts: Array.isArray(posts) && posts.map(mapPostCardData),
   };
 }
 
@@ -157,7 +164,7 @@ export async function getTopPosts() {
  */
 
 export async function getSidePosts() {
-  const apolloClient = getApolloClient();
+  const apolloClient = getClient();
 
   const data = await apolloClient.query({
     query: QUERY_SIDE_POSTS,
@@ -174,8 +181,8 @@ export async function getSidePosts() {
  * getPostsByCategoryId
  */
 
-export async function getPostsByCategoryId({categoryId, ...options} = {}) {
-  const apolloClient = getApolloClient();
+export async function getPostsByCategoryId(categoryId: string) {
+  const apolloClient = getClient();
 
   let postData;
 
@@ -186,13 +193,12 @@ export async function getPostsByCategoryId({categoryId, ...options} = {}) {
         categoryId,
       },
     });
-  } catch (e) {
-    console.log(`[posts][getPostsByCategoryId] Failed to query post data: ${e.message}`);
-    throw e;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(`[posts][getPostsByCategoryId] Failed to query post data: ${err.message}`);
+    }
+    throw err;
   }
-
-  console.log(postData?.data.posts.edges);
-
 
   const posts = postData?.data.posts.edges.map(({node = {}}) => node);
 
@@ -205,8 +211,8 @@ export async function getPostsByCategoryId({categoryId, ...options} = {}) {
  * getPaginatedPostsByCategoryId
  */
 
-export async function getPaginatedPostsByCategoryId(categoryId: number, currentPage: number = 1) {
-  const {posts} = await getPostsByCategoryId({categoryId});
+export async function getPaginatedPostsByCategoryId(categoryId: string, currentPage: number = 1) {
+  const {posts} = await getPostsByCategoryId(categoryId);
   const postsPerPage = await getPostsPerPage();
   const pagesCount = await getPagesCount(posts, postsPerPage);
 
@@ -291,7 +297,7 @@ export function mapPostCardData(postData: IQueryData = {}): IPostCard {
   } = postData;
 
   const post = {
-    databaseId: databaseId,
+    postId: databaseId,
     slug: slug,
     title: title,
     categories: [],
@@ -341,7 +347,7 @@ export function mapPostData(postData: IQueryData = {}): IPost {
   } = postData;
 
   const post = {
-    databaseId: databaseId,
+    postId: databaseId,
     slug: slug,
     title: title,
     metaTitle: metaTitle,
@@ -379,19 +385,28 @@ export function mapPostData(postData: IQueryData = {}): IPost {
  * getRelatedPosts
  */
 
-export async function getRelatedPosts(categories, postId, count = 5) {
+export async function getRelatedPosts(
+  categories: ICategoryCard[],
+  postId: string,
+  count = 5
+) {
   if (!Array.isArray(categories) || categories.length === 0) return;
 
-  let related = {
-    category: categories && categories.shift(),
+  let related: {category: ICategoryCard, posts: IPostCard[]} = {
+    category: mapCategoryData(categories && categories.shift()),
+    posts: []
   };
 
   if (related.category) {
-    const {posts} = await getPostsByCategoryId({
-      categoryId: related.category.databaseId,
-    });
+    const {posts} = await getPostsByCategoryId(
+      related.category.id,
+    );
 
-    const filtered = posts.filter(({postId: id}) => id !== postId);
+    if (!posts) {
+      return false;
+    }
+
+    const filtered = posts.filter(({postId: id}: {postId: string}) => id !== postId);
     const sorted = sortObjectsByDate(filtered);
     // related.posts = sorted.map((post) => ({ title: post.title, slug: post.slug }));
 
@@ -417,7 +432,7 @@ export async function getRelatedPosts(categories, postId, count = 5) {
  * sortStickyPosts
  */
 
-export function sortStickyPosts(posts) {
+export function sortStickyPosts(posts: IPostCard[]) {
   return [...posts].sort((post) => (post.isSticky ? -1 : 1));
 }
 
@@ -427,24 +442,26 @@ export function sortStickyPosts(posts) {
 
 export async function getPostsPerPage() {
   //If POST_PER_PAGE is defined at next.config.js
-  if (process.env.POSTS_PER_PAGE) {
+  if (appConfig.postsPerPage) {
     console.warn(
       'You are using the deprecated POST_PER_PAGE variable. Use your WordPress instance instead to set this value ("Settings" > "Reading" > "Blog pages show at most").'
     );
-    return Number(process.env.POSTS_PER_PAGE);
+    appConfig.postsPerPage;
   }
 
   try {
-    const apolloClient = getApolloClient();
+    const apolloClient = getClient();
 
     const {data} = await apolloClient.query({
       query: QUERY_POST_PER_PAGE,
     });
 
     return Number(data.allSettings.readingSettingsPostsPerPage);
-  } catch (e) {
-    console.log(`Failed to query post per page data: ${e.message}`);
-    throw e;
+  } catch (err) {
+    if (err instanceof Error) {
+      console.log(`Failed to query post per page data: ${err.message}`);
+    }
+    throw err;
   }
 }
 
@@ -452,7 +469,10 @@ export async function getPostsPerPage() {
  * getPageCount
  */
 
-export async function getPagesCount(posts, postsPerPage) {
+export async function getPagesCount(
+  posts: IPostCard[],
+  postsPerPage: number
+) {
   const _postsPerPage = postsPerPage ?? (await getPostsPerPage());
   return Math.ceil(posts.length / _postsPerPage);
 }

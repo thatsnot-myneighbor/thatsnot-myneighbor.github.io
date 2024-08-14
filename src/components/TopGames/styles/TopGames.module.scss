@@ -1,0 +1,11 @@
+@use "vars/media";
+@use "vars/mixins";
+
+.topGames {
+  position: relative;
+  background: var(--app-color-bg-transparent);
+  border-radius: 25px;
+  box-shadow: 0 2px 0 0 rgb(255 255 255 / 11%) inset;
+  padding: 15px;
+  margin-bottom: 30px;
+}
