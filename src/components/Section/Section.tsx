@@ -22,7 +22,7 @@ const Section = (
   }: TSectionProps) => {
   const sectionClassName = new ClassName(styles.section);
 
-  sectionClassName.addIf(className, className);
+  sectionClassName.addIf(className);
 
   return (
     <section id={id} className={sectionClassName.toString()} {...rest}>

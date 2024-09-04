@@ -1,4 +1,6 @@
 export interface IAppConfig {
+    export: boolean;
+    development: boolean;
     endpoint: string;
     seo: boolean;
     postsPerPage?: number | false;

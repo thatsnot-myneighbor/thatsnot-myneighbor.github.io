@@ -7,7 +7,9 @@ import Navbar from './Navbar';
 
 import styles from './styles/Header.module.scss';
 import NavbarToggler from "@/components/Header/NavbarToggler";
-import {unstable_noStore} from "next/cache";
+import { getMenusContext } from "@/utils/hooks/ServerContext";
+import {IMenu} from "@/utils/interfaces/menus";
+import {findMenuByLocation, MENU_LOCATION_NAVIGATION_DEFAULT} from "@/utils/lib/menus";
 
 interface IHeaderProps {
   title: string;
@@ -17,7 +19,10 @@ interface IHeaderProps {
 }
 
 const Header = ({title, searchParams}: IHeaderProps) => {
-  unstable_noStore();
+  const menus: Array<IMenu> = getMenusContext();
+  const navigationLocation = process.env.WORDPRESS_MENU_LOCATION_NAVIGATION || MENU_LOCATION_NAVIGATION_DEFAULT;
+  const navigation = findMenuByLocation(menus, navigationLocation);
+  const actionsmenu = findMenuByLocation(menus, 'actionsmenu');
 
   return (
     <>
@@ -36,7 +41,7 @@ const Header = ({title, searchParams}: IHeaderProps) => {
         <Container>
           <div className={styles.header__inner}>
             <Logo/>
-            <Navbar />
+            <Navbar menu={navigation} actions={actionsmenu} />
             <NavbarToggler />
           </div>
         </Container>

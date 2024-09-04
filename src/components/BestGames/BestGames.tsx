@@ -4,7 +4,7 @@ import Image from 'next/image';
 import BestGame from './BestGame';
 
 import { getSidePostsContext } from '@/utils/hooks/ServerContext';
-import { postPathBySlug } from '@/utils/lib/posts';
+import { postPathBySlug } from '@/utils/helpers/posts';
 import { pagePathBySlug } from '@/utils/lib/pages';
 
 const BestGames = ({ ...rest }) => {

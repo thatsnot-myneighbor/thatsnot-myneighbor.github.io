@@ -3,6 +3,8 @@
 .footer {
   width: 100%;
   border-top: 1px solid var(--app-color-border-dark);
+  background: var(--app-color-bg-transparent);
+  padding: 1rem 0;
 
   &__inner {
     display: flex;

@@ -1,7 +1,7 @@
 // Components
 import Link from 'next/link';
 import Image from 'next/image';
-import logo from "./assets/logo.svg";
+import logo from "./assets/logo.webp";
 
 // Styles
 import styles from './styles/Logo.module.scss';
@@ -20,8 +20,8 @@ const Logo = () => {
                 src={logo}
                 className={styles.logo__image}
                 alt="alt"
-                width="109"
-                height="32"
+                width="167"
+                height="60"
             />
         </Link>
     );

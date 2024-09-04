@@ -11,7 +11,7 @@ type TSectionHeadingProps = {
 const SectionHeading = ({ children, className, ...rest }: TSectionHeadingProps) => {
   const sectionClassName = new ClassName(styles.sectionHeading);
 
-  sectionClassName.addIf(className, className);
+  sectionClassName.addIf(className);
 
   return (
     <div className={sectionClassName.toString()} {...rest}>

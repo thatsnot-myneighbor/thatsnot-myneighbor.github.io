@@ -6,5 +6,7 @@ export interface ISiteOptions {
 }
 
 export interface ISweetcoreSettings {
-    footer: object;
+    footer: {
+        copyright: string;
+    };
 }

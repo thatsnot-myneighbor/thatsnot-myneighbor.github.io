@@ -11,7 +11,7 @@ export interface IMenu {
 export interface IMenuItem {
     cssClasses: Array<string>;
     id: string;
-    parentID?: string;
+    parentId?: string;
     label: string;
     title?: string;
     target?: string;
@@ -19,7 +19,7 @@ export interface IMenuItem {
     csOptionsMenu: {
         menuIcon:string
     };
-    children: Array<IMenuItem>
+    children?: Array<IMenuItem>
 }
 
 export interface IMenuItemsTree extends Array<IMenuItem> {}

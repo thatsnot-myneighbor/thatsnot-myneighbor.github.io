@@ -12,7 +12,7 @@ type TPlayerMetaProps = {
 const PlayerMeta = ({handlerFullscreen, className, ...rest}: TPlayerMetaProps) => {
   const playerMetaClassName = new ClassName(styles.playerMeta);
 
-  playerMetaClassName.addIf(className, className);
+  playerMetaClassName.addIf(className);
 
   return (
     <div className={playerMetaClassName.toString()} {...rest}>

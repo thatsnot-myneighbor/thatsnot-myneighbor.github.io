@@ -3,10 +3,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { getSidePostsContext } from '@/utils/hooks/ServerContext';
-import { postPathBySlug } from '@/utils/lib/posts';
+import { postPathBySlug } from '@/utils/helpers/posts';
 import { pagePathBySlug } from '@/utils/lib/pages';
+import {IPostCard} from "@/utils/interfaces/posts";
 
-const BestGame = ({ post }) => {
+const BestGame = ({ post }: {post: IPostCard}) => {
     const featuredImageUrl = post.featuredImage ? post.featuredImage.sourceUrl : '';
 
     return (

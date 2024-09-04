@@ -1,13 +1,24 @@
+import CategoryLayout from "@/app/c/[slug]/layout";
 import {getAllCategories, getCategoryBySlug} from '@/utils/lib/categories';
 import {getPaginatedPostsByCategoryId} from '@/utils/lib/posts';
 
 import TemplateArchive from '@/templates/TemplateArchive';
+import {Metadata} from "next";
+
+export const metadata: Metadata = {
+  title: "",
+};
 
 export default async function Category({ params }: { params: { slug: string } }) {
   const {category} = await getCategoryBySlug(params.slug);
 
   if (!category) {
     return {};
+  }
+
+  if (category.seo) {
+    metadata.title = category.seo.title;
+    metadata.description = category.seo.description;
   }
 
   const {id, title, content, slug} = category;
@@ -20,31 +31,15 @@ export default async function Category({ params }: { params: { slug: string } })
   }
 
   const {posts, pagination} = await getPaginatedPostsByCategoryId(id);
+  pagination.basePath = '/c/' + slug;
 
-  return <TemplateArchive
+  return <CategoryLayout>
+  <TemplateArchive
     title={title}
     posts={posts}
     pagination={pagination}
     slug={slug}
     content={content}
-  />;
-}
-
-export async function generateStaticParams() {
-  const categories = await getAllCategories();
-
-  if (!categories) {
-    return {};
-  }
-
-  const paths = categories.map((category) => {
-    const {slug} = category;
-    return {
-      params: {
-        slug,
-      },
-    };
-  });
-
-  return paths;
+  />
+  </CategoryLayout>;
 }

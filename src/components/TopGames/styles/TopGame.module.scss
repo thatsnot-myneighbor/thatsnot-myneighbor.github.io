@@ -7,15 +7,16 @@
   color: #fff;
   text-decoration: none;
   position: relative;
-  max-width: 80px;
+  max-width: 120px;
 
   &__thumb {
-    border-radius: 15px;
     overflow: hidden;
 
     img {
       display: block;
-      border-radius: 15px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 50%;
 
       @include mixins.transition;
     }
@@ -36,11 +37,11 @@
 
   &__title {
     display: block;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     line-height: 1.1;
     color: #fff;
     padding: 6px 0 5px;
-    font-weight: 400;
+    // font-weight: 700;
     text-align: center;
   }
 

@@ -13,11 +13,8 @@ import {
   setSidePostsContext,
 } from "@/utils/hooks/ServerContext";
 import {getSidePosts} from "@/utils/lib/posts";
-import {unstable_noStore} from "next/cache";
 import {ApolloWrapper} from "@/components/ApolloWrapper";
 import {NavbarProvider} from "@/utils/hooks/NavbarProvider";
-
-unstable_noStore();
 
 const {menus = []} = await getAllMenus();
 const settings = await getSiteoptions();

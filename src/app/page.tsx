@@ -1,17 +1,24 @@
 import PostCard from "@/components/PostCard";
 import Pagination from "@/components/Pagination";
-import {getPaginatedPosts, getTopPosts} from "@/utils/lib/posts";
+import {getAllPosts, getPagesCount, getPaginatedPosts, getPostsByCategoryId} from "@/utils/lib/posts";
 import Section from "@/components/Section";
 import {getPageByUri} from "@/utils/lib/pages";
-import TopGames from "@/components/TopGames";
 import ContentBox from "@/components/ContentBox";
 import {unstable_noStore} from "next/cache";
+import {Metadata} from "next";
+import appConfig from "@/utils/lib/config";
+import {getCategoryBySlug} from "@/utils/lib/categories";
+
+export const metadata: Metadata = {
+  title: "",
+};
 
 export default async function Home() {
 
-  unstable_noStore();
+  if (!appConfig.export) {
+    unstable_noStore();
+  }
 
-  const {topPosts} = await getTopPosts();
   const {posts, pagination} = await getPaginatedPosts();
   const page = await getPageByUri('homepage');
 
@@ -22,9 +29,13 @@ export default async function Home() {
     };
   }
 
+  if (page.seo) {
+    metadata.title = page.seo.title;
+    metadata.description = page.seo.description;
+  }
+
   return (
     <div className="page">
-      {/*{topPosts && topPosts.length > 0 && (<TopGames posts={topPosts} />)}*/}
 
       <Section
         title="All games"
@@ -61,3 +72,15 @@ export default async function Home() {
     </div>
   );
 }
+
+export async function generateStaticParams() {
+  const posts = await getAllPosts();
+  const pagesCount = await getPagesCount(posts, 10);
+
+  const paths = [...new Array(pagesCount)].map((_, i) => {
+    return { page: String(i + 1) };
+  });
+
+  return paths;
+}
+

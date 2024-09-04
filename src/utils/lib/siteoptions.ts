@@ -12,9 +12,11 @@ export async function getSiteoptions(): Promise<ISiteOptions> {
         siteData = await apolloClient.query({
             query: QUERY_SITE_DATA,
         });
-    } catch (e) {
-        console.log(`[site][getSiteMetadata] Failed to query site data: ${e.message}`);
-        throw e;
+    } catch (err) {
+        if (err instanceof Error) {
+            console.log(`[site][getSiteMetadata] Failed to query site data: ${err.message}`);
+        }
+        throw err;
     }
 
     const { generalSettings } = siteData?.data || {};
@@ -24,9 +26,11 @@ export async function getSiteoptions(): Promise<ISiteOptions> {
         siteSettings = await apolloClient.query({
             query: QUERY_SITE_SETTINGS,
         });
-    } catch (e) {
-        console.log(`[site][getSiteMetadata] Failed to query site settings: ${e.message}`);
-        throw e;
+    } catch (err) {
+        if (err instanceof Error) {
+            console.log(`[site][getSiteMetadata] Failed to query site settings: ${err.message}`);
+        }
+        throw err;
     }
 
     const { sweetcoreSettings } = siteSettings?.data || {};

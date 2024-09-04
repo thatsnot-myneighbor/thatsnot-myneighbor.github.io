@@ -13,7 +13,7 @@ const { homepage = '' } = config;
 type TPaginationProps = {
     pagesCount: number,
     currentPage: number,
-    basePath: string,
+    basePath?: string,
     addCanonical?: boolean
 }
 

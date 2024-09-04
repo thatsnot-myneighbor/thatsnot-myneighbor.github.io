@@ -7,7 +7,7 @@ export interface IFeaturedImage {
     srcSet: string;
     sizes: string;
     id: number;
-    mediaDetails: {
+    mediaDetails?: {
         filteredSizes?: {
             name: string
             sourceUrl: string
@@ -16,13 +16,13 @@ export interface IFeaturedImage {
 }
 
 export interface ICsPostOptions {
-    flashFullwidth: number;
+    flashFullwidth: boolean;
     fieldGroupName: string;
-    flashBest: number;
-    flashFavorites: number;
+    flashBest: boolean;
+    flashFavorites: boolean;
     flashIframe: string;
     flashLink: string;
-    flashSide: number;
+    flashSide: boolean;
     flashType: string;
     shortDescription: string;
 }
@@ -32,7 +32,7 @@ export interface IPostCard {
     slug: string;
     title: string;
     categories: ICategoryCard[];
-    featuredImage: IFeaturedImage;
+    featuredImage?: IFeaturedImage;
     isSticky: boolean;
     likes: {
         up: number;
@@ -45,15 +45,36 @@ export interface IPost {
     slug: string;
     title: string;
     metaTitle: string;
-    metaDescription: string;
     description: string;
     content: string;
     categories?: ICategoryCard[];
     csOptionsPost: ICsPostOptions;
-    featuredImage? : {};
+    featuredImage? : IFeaturedImage;
     isSticky: boolean;
     likes: {
         up: number;
         down: number;
-    }
+    };
+    rating: {
+        count: number;
+        total: number;
+    };
+    seo?: {
+        title: string;
+        description: string;
+        canonical?: string;
+        og?: {
+            author?: string;
+            description?: string;
+            image?: string;
+            modifiedTime?: string;
+            publishedTime?: string;
+            publisher?: string;
+            title?: string;
+            type?: string;
+        };
+        article?: {};
+        robots?: {};
+        twitter?: {};
+    };
 }

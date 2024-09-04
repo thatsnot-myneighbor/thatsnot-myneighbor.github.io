@@ -1,149 +1,132 @@
-import { unstable_noStore as noStore } from 'next/cache';
-import Head from 'next/head';
-import { useMutation } from '@apollo/client';
-import { FaStar, FaStarHalfAlt } from 'react-icons/fa';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import ReactStars from 'react-rating-stars-component';
-
-import { MUTATION_CREATE_RATING } from '@/utils/data/create-rating';
-import { getPostBySlug, getAllPosts, getRelatedPosts } from '@/utils/lib/posts';
-//import { categoryPathBySlug } from '@/utils/lib/categories';
-import { formatDate } from '@/utils/helpers/datetime';
-
-import Header from '@/components/Header';
+import {unstable_noStore, unstable_noStore as noStore} from 'next/cache';
+import {getPostBySlug, getAllPosts, getRelatedPosts} from '@/utils/lib/posts';
 import Section from '@/components/Section';
-import Container from '@/components/Container';
 import ContentBox from '@/components/ContentBox';
-//import Player from '@/components/Player';
 import PostCard from '@/components/PostCard';
-//import CommentForm from '@/components/CommentForm';
-
 import styles from './page.module.scss';
 import GameHead from "@/components/GameHead";
 import Player from "@/components/Player";
 import CommentForm from "@/components/CommentForm/CommentForm";
+import {Metadata} from "next";
+import appConfig from "@/utils/lib/config";
 
-export default async function Post({ params }: { params: { slug: string } }) {
+if (!appConfig.export) {
+  unstable_noStore();
+}
 
-    noStore();
+export const metadata: Metadata = {
+  title: "",
+};
 
-    const { post } = await getPostBySlug(params?.slug);
-    if (!post) {
-        return {
-            props: {},
-            notFound: true,
-        };
-    }
+export default async function Post({params}: { params: { slug: string } }) {
 
-    const { category: relatedCategory, posts: relatedPosts } =
-    (await getRelatedPosts(post.categories, post.databaseId)) || {};
-    const relatedPostsList = relatedPosts || {};
+  const {post} = await getPostBySlug(params?.slug);
+  if (!post) {
+    return {
+      props: {},
+      notFound: true,
+    };
+  }
 
-    const isServer = typeof window === 'undefined' ? true : false;
+  if (post.seo) {
+    metadata.title = post.seo.title;
+    metadata.description = post.seo.description;
+  }
 
-    /**
-    * Handle the comment form submission.
-    */
-    async function handleRating(newVote) {
-        await createRating({
-            variables: {
-                vote: newVote,
-                postID: post.databaseId,
-            }
-        });
-    }
+  const {category: relatedCategory, posts: relatedPosts} =
+  (await getRelatedPosts(post.categories, post.postId)) || {};
+  const relatedPostsList = relatedPosts || {};
 
-    return (
-        <div className="page">
-            <Container>
-                <GameHead>
-                    <h1
-                        dangerouslySetInnerHTML={{
-                            __html: post.title,
-                        }}
-                    />
-                </GameHead>
+  return (
+    <div className="page">
+      <GameHead
+        post={post}
+      >
+        <h1
+          dangerouslySetInnerHTML={{
+            __html: post.title,
+          }}
+        />
+      </GameHead>
 
-                <Section>
-                    <ContentBox>
-                        <div
-                            className={styles.content}
-                            dangerouslySetInnerHTML={{
-                                __html: post.csOptionsPost.shortDescription,
-                            }}
-                        />
-                    </ContentBox>
-                </Section>
+      <Section>
+        <ContentBox>
+          <div
+            className={styles.content}
+            dangerouslySetInnerHTML={{
+              __html: post.csOptionsPost.shortDescription,
+            }}
+          />
+        </ContentBox>
+      </Section>
 
-                <Section>
-                    <Player
-                        options={post.csOptionsPost}
-                    >
-                    </Player>
-                </Section>
+      <Section>
+        <Player
+          options={post.csOptionsPost}
+        >
+        </Player>
+      </Section>
 
-                <Section>
-                    <ContentBox>
-                        <div
-                            className={styles.content}
-                            dangerouslySetInnerHTML={{
-                                __html: post.content,
-                            }}
-                        />
-                    </ContentBox>
-                </Section>
+      <Section>
+        <ContentBox>
+          <div
+            className={styles.content}
+            dangerouslySetInnerHTML={{
+              __html: post.content,
+            }}
+          />
+        </ContentBox>
+      </Section>
 
-                <Section>
-                    {Array.isArray(relatedPostsList) && relatedPostsList.length > 0 && (
-                      <ul className="games-grid">
-                          {relatedPostsList.map((post) => (
-                            <li className="games-grid__item" key={post.slug}>
-                                <PostCard post={post} />
-                            </li>
-                          ))}
-                      </ul>
-                    )}
-                </Section>
+      <Section>
+        {Array.isArray(relatedPostsList) && relatedPostsList.length > 0 && (
+          <ul className="games-grid">
+            {relatedPostsList.map((post) => (
+              <li className="games-grid__item" key={post.slug}>
+                <PostCard post={post}/>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
 
-                <Section id="comments" title="Comments">
-                    <CommentForm postID={post.postId} />
-                </Section>
+      <Section id="comments" title="Comments">
+        <CommentForm postId={post.postId}/>
+      </Section>
 
-                <Section>
-                    <div className="columns columns--side-right">
-                        {/* <CommentForm postID={post.databaseId} /> */}
-                        <div className="promo">
-                            Promo
-                        </div>
-                    </div>
-                </Section>
-
-            </Container>
-
+      <Section>
+        <div className="columns columns--side-right">
+          {/* <CommentForm postID={post.databaseId} /> */}
+          <div className="promo">
+            Promo
+          </div>
         </div>
-    );
+      </Section>
+
+    </div>
+  );
 }
 
 export async function generateStaticParams() {
-    // Only render the most recent posts to avoid spending unecessary time
-    // querying every single post from WordPress
+  // Only render the most recent posts to avoid spending unecessary time
+  // querying every single post from WordPress
 
-    // Tip: this can be customized to use data or analytitcs to determine the
-    // most popular posts and render those instead
+  // Tip: this can be customized to use data or analytitcs to determine the
+  // most popular posts and render those instead
 
-    const { posts } = await getAllPosts({
-        queryIncludes: 'index',
-    });
+  const posts = await getAllPosts({
+    queryIncludes: 'index',
+  });
 
-    if (!posts) {
-        return {};
-    }
+  if (!posts) {
+    return [];
+  }
 
-    const paths = posts
-        .filter(({ slug }) => typeof slug === 'string')
-        .map(({ slug }) => ({
-            slug,
-        }));
+  const paths = posts
+    .filter(({slug}) => typeof slug === 'string')
+    .map(({slug}) => ({
+      slug,
+    }));
 
-    return paths;
+  return paths;
 }

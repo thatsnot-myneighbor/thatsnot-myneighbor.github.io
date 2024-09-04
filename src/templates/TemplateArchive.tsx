@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Section from '@/components/Section';
 import Container from '@/components/Container';
 import PostCard from '@/components/PostCard';
@@ -7,6 +8,7 @@ import {IPostCard} from "@/utils/interfaces/posts";
 import ContentBox from "@/components/ContentBox";
 import PageHeading from "@/components/Heading/PageHeading";
 import {IPagination} from "@/utils/interfaces/commons";
+import appConfig from "@/utils/lib/config";
 
 type TTemplateArchiveProps = {
   slug: string;
@@ -23,15 +25,8 @@ export default function TemplateArchive({
   pagination,
 }: TTemplateArchiveProps) {
 
-  // if (appConfig.seo) {
-  //   metadata.title = `${title} - ${siteMetadata.title}`;
-  //   metadata.og.title = metadata.title;
-  //   metadata.twitter.title = metadata.title;
-  // }
-
   return (
-    <Container>
-
+    <div>
       <Section>
         <PageHeading title={title}>
           <h1>{title}</h1>
@@ -45,7 +40,7 @@ export default function TemplateArchive({
               {posts.map((post) => {
                 return (
                   <li className="games-grid__item" key={post.slug}>
-                    <PostCard post={post} />
+                    <PostCard post={post}/>
                   </li>
                 );
               })}
@@ -73,6 +68,6 @@ export default function TemplateArchive({
           </ContentBox>
         </Section>
       )}
-    </Container>
+    </div>
   );
 }

@@ -41,10 +41,12 @@ const CommentForm = ({postId}: {postId: string}) => {
 
     // Create the comment and await the status.
     await createComment({
-      name,
-      email,
-      comment,
-      postId
+      variables: {
+        name,
+        email,
+        comment,
+        postId
+      }
     })
 
     // If the comment was created successfully...

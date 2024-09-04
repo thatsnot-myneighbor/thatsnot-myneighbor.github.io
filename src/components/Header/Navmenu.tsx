@@ -1,27 +1,23 @@
-// Imports
-import Link from 'next/link';
-import { getMenusContext } from "@/utils/hooks/ServerContext";
-import { findMenuByLocation, MENU_LOCATION_NAVIGATION_DEFAULT } from '@/utils/lib/menus';
+'use client';
 
 // Components
 import NavListItem from '@/components/NavListItem';
 
 import styles from './styles/Navmenu.module.scss';
-import { IMenu } from '@/utils/interfaces/menus';
+import {IMenuItemsTree} from '@/utils/interfaces/menus';
 
 /**
  * Navigation for the application.
  * Includes mobile menu.
  */
-const Navmenu = () => {
-    const menus: Array<IMenu> = getMenusContext();
+type TNavmenuProps = {
+    menu: IMenuItemsTree
+}
 
-    const navigationLocation = process.env.WORDPRESS_MENU_LOCATION_NAVIGATION || MENU_LOCATION_NAVIGATION_DEFAULT;
-    const navigation = findMenuByLocation(menus, navigationLocation);
-
+const Navmenu = ({menu}: TNavmenuProps) => {
     return (
         <ul className={styles.navmenu}>
-            {navigation?.map((listItem) => {
+            {menu?.map((listItem) => {
                 return <NavListItem key={listItem.id} className={styles.navSubMenu} item={listItem} />;
             })}
         </ul>

@@ -5,11 +5,11 @@
 :root {
   --app-color-accent: #{colors.$accent};
   --app-color-headings: #{colors.$white};
-  --app-color-text: #{colors.$white};
+  --app-color-text: rgb(255 255 255 / 90%);
   --app-color-light: #fce3b9;
   --app-color-secondary: #{colors.$secondary};
   --app-color-bg: #1f1862;
-  --app-color-bg-transparent: #{color.adjust(#fff, $alpha: -0.8)};
+  --app-color-bg-transparent: #{color.adjust(#000, $alpha: -0.8)};
   --app-gradient-bg:
     radial-gradient(at 98.0% 50.0%, #85103b 0px, transparent 50%),
     radial-gradient(at 26.0% 3.0%, #1476a3 0px, transparent 50%),

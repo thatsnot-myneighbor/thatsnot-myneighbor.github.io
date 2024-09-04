@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 // import useSite from 'hooks/use-site';
-import { postPathBySlug } from '@/utils/lib/posts';
+import { postPathBySlug } from '@/utils/helpers/posts';
 // import { categoryPathBySlug } from '@/utils/lib/categories';
 
 import { getSiteoptions } from '@/utils/hooks/ServerContext';

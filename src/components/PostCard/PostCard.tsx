@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {IPostCard} from '@/utils/interfaces/posts';
-import {postPathBySlug} from '@/utils/lib/posts';
+import {postPathBySlug} from '@/utils/helpers/posts';
 
 import FeaturedImage from '@/components/FeaturedImage';
 
@@ -11,7 +11,11 @@ const PostCard = ({post, options = {}}: { post: IPostCard, options?: {} }) => {
   const {title, slug, featuredImage, isSticky = false} = post;
   let postThumbnailUrl = '';
 
-  if (featuredImage.mediaDetails.filteredSizes !== undefined) {
+  if (
+    featuredImage !== undefined &&
+    featuredImage.mediaDetails !== undefined &&
+    featuredImage.mediaDetails.filteredSizes !== undefined
+  ) {
     let thumbnailsData = featuredImage.mediaDetails.filteredSizes;
 
     const thumbnails = thumbnailsData.reduce(
@@ -36,13 +40,13 @@ const PostCard = ({post, options = {}}: { post: IPostCard, options?: {} }) => {
     <div className={styles.postCard}>
       <div className={styles.postCard__thumb}>
         {isSticky && <i className="postCard__sticky-icon"></i>}
-        {postThumbnailUrl && (
+        {featuredImage && (
           <FeaturedImage
             {...featuredImage}
             src={postThumbnailUrl}
             dangerouslySetInnerHTML={featuredImage.caption}
-            width="240px"
-            height="240px"
+            width="240"
+            height="240"
             srcSet=""
             alt={post.title}
           />

@@ -11,10 +11,21 @@ export const [
   getSidePosts,
   setSidePosts
 ] = ServerContext<IPostCard[] | false>(false);
+
+const defaultOptions = {
+  title: 'Set title',
+  siteTitle: 'Set title',
+  description: 'Set description',
+  sweetcoreSettings: {
+    footer: {
+      copyright: 'Set copyright'
+    },
+  }
+}
 export const [
   getSiteoptions,
   setSiteoptions
-] = ServerContext<ISiteOptions | null>(null);
+] = ServerContext<ISiteOptions>(defaultOptions);
 
 
 export const getMenusContext = () => {

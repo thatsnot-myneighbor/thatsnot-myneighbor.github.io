@@ -10,36 +10,37 @@ import styles from './styles/Navbar.module.scss';
 import ClassName from "@/utils/models/classname";
 import {useNavbarContext} from "@/utils/hooks/NavbarProvider";
 import {useState} from "react";
+import {IMenuItemsTree} from "@/utils/interfaces/menus";
+import Actions from "@/components/Header/Actions";
 
 type TNavbarProps = {
-  className?: string,
+    className?: string,
+    menu: IMenuItemsTree,
+    actions: IMenuItemsTree,
 }
 
-const Navbar = ({className}: TNavbarProps) => {
-  const navbarClassName = new ClassName(styles.navbar);
-  navbarClassName.addIf(className, className);
-  let { isNavOpen } = useNavbarContext();
+const Navbar = ({className, menu, actions}: TNavbarProps) => {
+    const navbarClassName = new ClassName([styles.navbar]);
+    navbarClassName.addIf(className);
+    let {isNavOpen} = useNavbarContext();
 
-  console.log(isNavOpen);
+    if (isNavOpen) {
+        navbarClassName.addIf(styles.navbarCollapsed);
+    }
 
-  return (
-    <div className={navbarClassName.toString()}>
-      {isNavOpen && (1)}
-      <div
-        className={styles.navbar__menu}
-      >
-      </div>
+    return (
+        <div className={navbarClassName.toString()}>
+            <div
+                className={styles.navbar__menu}
+            >
+                <Navmenu menu={menu}/>
+            </div>
 
-      <div className={styles.navbar__actions}>
-        <ul id="menu-actions" className="actions">
-          <li id="menu-item-106" className="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-106">
-            <a href="https://raft-v1.local/c/new-games/">New games</a></li>
-          <li id="menu-item-107" className="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-107">
-            <a href="https://raft-v1.local/c/best-games/">Best games</a></li>
-        </ul>
-      </div>
-    </div>
-  );
+            <div className={styles.navbar__actions}>
+              <Actions menu={actions}/>
+            </div>
+        </div>
+    );
 };
 
 export default Navbar;

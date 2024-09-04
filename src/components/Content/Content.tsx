@@ -12,7 +12,7 @@ type TContentProps = {
 const Content = ({ children, className }: TContentProps) => {
     const contentClassName = new ClassName(styles.content);
 
-    contentClassName.addIf(className, className);
+    contentClassName.addIf(className);
 
     return (
         <section className= { contentClassName.toString() } >

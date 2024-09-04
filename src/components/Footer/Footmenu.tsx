@@ -1,5 +1,5 @@
 // Imports
-import { getMenus } from "@/utils/hooks/ServerContext";
+import {getMenus, getMenusContext} from "@/utils/hooks/ServerContext";
 import { findMenuByLocation, MENU_LOCATION_NAVIGATION_DEFAULT } from '@/utils/lib/menus';
 
 // Components
@@ -13,7 +13,7 @@ import { IMenu } from '@/utils/interfaces/menus';
  * Includes mobile menu.
  */
 const Footmenu = () => {
-    const menus = getMenus();
+    const menus: Array<IMenu> = getMenusContext();
 
     const navigationLocation = process.env.WORDPRESS_FOOTMENU_LOCATION || MENU_LOCATION_NAVIGATION_DEFAULT;
     const navigation = findMenuByLocation(menus, navigationLocation);

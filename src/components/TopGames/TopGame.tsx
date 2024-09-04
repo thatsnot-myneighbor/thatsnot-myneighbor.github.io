@@ -3,10 +3,37 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {IPostCard} from "@/utils/interfaces/posts";
 
-import { postPathBySlug } from '@/utils/lib/posts';
+import { postPathBySlug } from '@/utils/helpers/posts';
 
 const TopGame = ({ post }: {post: IPostCard}) => {
-    const featuredImageUrl = post.featuredImage ? post.featuredImage.sourceUrl : '';
+    let featuredImageUrl = post.featuredImage ? post.featuredImage.sourceUrl : '';
+
+    let postThumbnailUrl = '';
+
+    if (
+      post.featuredImage !== undefined &&
+      post.featuredImage.mediaDetails !== undefined &&
+      post.featuredImage.mediaDetails.filteredSizes !== undefined
+    ) {
+        let thumbnailsData = post.featuredImage.mediaDetails.filteredSizes;
+
+        const thumbnails = thumbnailsData.reduce(
+          (acc: {}, imageSize: { name: string, sourceUrl: string }): {[p:string]: string} => {
+              let key = imageSize.name.replace(/-/g, '_');
+              let url = imageSize.sourceUrl;
+
+              return {
+                  ...acc,
+                  [key]: url
+              }
+          },
+          {}
+        );
+
+        if (thumbnails.post_thumbnail !== undefined) {
+            featuredImageUrl = thumbnails.post_thumbnail;
+        }
+    }
 
     return (
         <Link
@@ -16,8 +43,8 @@ const TopGame = ({ post }: {post: IPostCard}) => {
             <span className={styles.topGame__thumb}>
                 <Image
                     src={featuredImageUrl}
-                    width="80"
-                    height="80"
+                    width="120"
+                    height="120"
                     alt={post.title}
                 />
             </span>

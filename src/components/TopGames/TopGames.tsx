@@ -5,20 +5,27 @@ import {IPostCard} from "@/utils/interfaces/posts";
 import TopGame from './TopGame';
 import {Swiper, SwiperSlide} from 'swiper/react';
 import { Navigation } from 'swiper/modules';
+import { Swiper as SwiperType } from 'swiper';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-import { useEffect, useState } from 'react'
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {useSuspenseQuery} from "@apollo/client";
+import {QUERY_TOP_POSTS} from "@/utils/data/posts";
+import {mapPostCardData} from "@/utils/helpers/posts";
+import {IQueryData} from "@/utils/interfaces/commons";
 
-type TTopGamesProps = {
-  posts: IPostCard[],
-}
-
-const TopGames = ({posts}: TTopGamesProps) => {
+const TopGames = () => {
   const [slidesPerView, setSlidesPerView] = useState(2);
+  const swiperRef = useRef<SwiperType>();
+
+  const { data } = useSuspenseQuery<IQueryData>(QUERY_TOP_POSTS);
+  const posts = data?.posts.edges.map(({node = {}}) => node);
+  const topPosts = Array.isArray(posts) && posts.map(mapPostCardData);
+
   useEffect(() => {
     setSlidesPerView(calcSlidesPerView());
   }, []);
@@ -41,20 +48,27 @@ const TopGames = ({posts}: TTopGamesProps) => {
     return view;
   }
 
+  if (!topPosts) {
+    return null;
+  }
+
   return (
     <section className={styles.topGames}>
 
       <div
         className={styles.sideWidget}
       >
-        <div className={styles.topGames__items}>
+        <div className={styles.topGamesWrapper}>
           <Swiper
+            className={styles.topGamesSlider}
             spaceBetween={10}
             slidesPerView={slidesPerView}
-            navigation={true}
             modules={[Navigation]}
+            onBeforeInit={(swiper) => {
+              swiperRef.current = swiper;
+            }}
           >
-            {posts.map((post) => {
+            {topPosts.map((post) => {
               return (
                 <SwiperSlide key={post.slug}>
                   <TopGame
@@ -65,6 +79,24 @@ const TopGames = ({posts}: TTopGamesProps) => {
               );
             })}
           </Swiper>
+          <div className={styles.topGamesNavs}>
+            <button
+              className={styles.topGamesNavPrev}
+              onClick={() => swiperRef.current?.slidePrev()}
+            >
+              <svg className="icon" width="20px" height="20px">
+                <use href="#angle-left"></use>
+              </svg>
+            </button>
+            <button
+              className={styles.topGamesNavNext}
+              onClick={() => swiperRef.current?.slideNext()}
+            >
+              <svg className="icon" width="20px" height="20px">
+                <use href="#angle-right"></use>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
     </section>

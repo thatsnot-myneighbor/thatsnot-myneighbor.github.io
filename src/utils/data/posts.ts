@@ -39,6 +39,10 @@ export const POST_FIELDS = gql`
       up
       down
     }
+    rating {
+      count
+      total
+    }
   }
 `;
 

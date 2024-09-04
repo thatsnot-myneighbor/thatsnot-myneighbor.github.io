@@ -97,19 +97,6 @@ svg {
   display: block;
 }
 
-a:not([class]) {
-  color: var(--app-color-link);
-  display: inline-block;
-  line-height: 1.8;
-  text-decoration: underline;
-
-  &:hover {
-    color: var(--app-color-link-hover);
-    text-decoration: none;
-    border-color: transparent;
-  }
-}
-
 figcaption {
   color: #00000030;
   font-size: 0.9em;

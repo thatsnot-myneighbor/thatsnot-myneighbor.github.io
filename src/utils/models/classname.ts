@@ -1,24 +1,31 @@
 class ClassName {
-  constructor(className) {
-    this.base = className;
+  base: string[];
 
+  constructor(className: string[] | string) {
     if (!Array.isArray(className)) {
-      this.base = [this.base];
+      className = [className]
     }
+
+    this.base = className;
   }
 
-  add(className) {
-    if (!Array.isArray(className)) {
-      className = [className];
-    }
-
+  add(className: string[]) {
     this.base = [...this.base, ...className];
 
     return this;
   }
 
-  addIf(className, condition) {
-    if (condition) this.add(className);
+  addIf(
+    className: string[] | string | undefined
+  ) {
+    if (!className) return this;
+
+    if (!Array.isArray(className)) {
+      className = [className]
+    }
+
+    this.add(className);
+
     return this;
   }
 

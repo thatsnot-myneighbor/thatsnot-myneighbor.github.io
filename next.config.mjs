@@ -3,7 +3,8 @@ import path from 'path';
 const __dirname = import.meta.dirname;
 
 const nextConfig = {
-  // output: 'export',
+  trailingSlash: true,
+  reactStrictMode: false,
   images: {
       unoptimized: true,
   },
@@ -16,5 +17,9 @@ const nextConfig = {
     WORDPRESS_PLUGIN_SEO: process.env.WORDPRESS_PLUGIN_SEO ? process.env.WORDPRESS_PLUGIN_SEO : 'false',
   }
 };
+
+if (process.env.NEXT_EXPORT) {
+  nextConfig.output = 'export';
+}
 
 export default nextConfig;

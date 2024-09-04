@@ -5,20 +5,20 @@ import { gql } from '@apollo/client';
  */
 export const MUTATION_CREATE_LIKES = gql`
   mutation createLikes (
-      $vote: Int!
-      $postID: Int!
+    $vote: Int!
+    $postID: Int!
+  ) {
+    createLikes(
+      input: {
+        vote: $vote
+        postID: $postID
+      }
     ) {
-      createLikes(
-        input: {
-          vote: $vote
-          postID: $postID
-        }
-      ) {
-        success
-        likes {
-          up
-          down
-        }
+      success
+      likes {
+        up
+        down
       }
     }
+  }
 `;

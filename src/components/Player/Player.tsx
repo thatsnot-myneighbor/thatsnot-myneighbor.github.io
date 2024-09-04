@@ -1,14 +1,20 @@
+/* eslint-disable */
 "use client";
 
-import { useEffect, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import screenfull from 'screenfull';
 import Link from 'next/link'
 import styles from './styles/Player.module.scss';
 import PlayerMeta from "./PlayerMeta";
 
-const Player = ({ options }) => {
-
-    const [gameInitialized, setGameInitialized] = useState(false);
+type TPlayerProps = {
+    options: {
+        flashFullwidth: boolean;
+        flashIframe: string;
+    }
+}
+const Player = ({ options }: TPlayerProps) => {
+    const gameInitialized = useRef<boolean>(false);
 
     useEffect(() => {
         const flash = document.getElementById('flash-container');
@@ -17,7 +23,7 @@ const Player = ({ options }) => {
             return;
         }
 
-        if (!gameInitialized) {
+        if (!gameInitialized.current) {
             addGameScrollListeners();
         } else {
             window.addEventListener('resize', gameRecalc);
@@ -40,11 +46,14 @@ const Player = ({ options }) => {
         return false;
     }
 
-    function enableFullscreen(event) {
+    function enableFullscreen(event: Event) {
         event.preventDefault();
 
         const flash = document.getElementById('flash-container');
-        if (canFullscreen) {
+
+        if (flash == null) {return false}
+
+        if (canFullscreen()) {
             if (screenfull.isEnabled) {
                 screenfull.request(flash);
             }
@@ -56,7 +65,7 @@ const Player = ({ options }) => {
         }
     }
 
-    function changeFullscreen(flash) {
+    function changeFullscreen(flash: HTMLElement) {
         if (screenfull.isFullscreen) {
             flash.classList.add('fullscreen');
         } else {
@@ -65,6 +74,7 @@ const Player = ({ options }) => {
     }
 
     function addGameScrollListeners() {
+        gameInitialized.current = false;
         window.addEventListener('scroll', gameInit, { once: true, passive: true });
         window.addEventListener('click', gameInit, { once: true, passive: true });
         window.addEventListener('mousemove', gameInit, { once: true, passive: true });
@@ -83,8 +93,8 @@ const Player = ({ options }) => {
     }
 
     function gameInit() {
-        if (gameInitialized === false) {
-            setGameInitialized(true);
+        if (gameInitialized.current === false) {
+            gameInitialized.current = true;
             gameLoader();
 
             setTimeout(() => {
@@ -119,63 +129,104 @@ const Player = ({ options }) => {
 
         iframes.forEach( (iframe) => {
             let external_src = iframe.getAttribute('external_src');
-            iframe.setAttribute('src', external_src);
-            iframe.removeAttribute("external_src");
+
+            if (external_src) {
+                iframe.setAttribute('src', external_src);
+                iframe.removeAttribute("external_src");
+            }
         });
     }
 
-    function playerStart(btnStart, flash) {
+    function playerStart(btnStart: HTMLElement, flash: HTMLElement) {
         const iframe_code = btnStart.dataset.code;
         const overlay = document.getElementById('js-overlay');
 
-        flash.innerHTML = iframe_code;
-        flash.classList.remove('hidden');
-        overlay.classList.add('hidden');
-        gameRecalc();
+        if (iframe_code !== undefined && overlay !== null) {
+            flash.innerHTML = iframe_code;
+            flash.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            gameRecalc();
+        }
     }
 
     function gameRecalc() {
 
         const flash = document.getElementById('flash-container');
-        const fullwidth = flash.dataset.fullwidth;
+        if (flash == null) {
+            return;
+        }
 
-        if (!fullwidth) {
+        if (!options.flashFullwidth) {
 
-            recalcIframe();
+            recalcNormal();
 
         } else {
 
-            var exampleContainer = document.querySelector('header .area');
-            var containerWidth = exampleContainer.clientWidth;
-
-            var gameContainer = document.querySelector('.flash-container');
-            var game = document.querySelector('.flash-container iframe');
-            var gameWidth = game.getAttribute('width');
-            game.classList.add('hidden');
-            var gameWidthRendered = gameContainer.clientWidth;
-            var differentWidth = gameWidth - gameWidthRendered;
-
-            let fullwidthContent = containerWidth + differentWidth;
-
-            let heading = document.querySelector('.area--content');
-            if (heading !== null && differentWidth > 0) {
-                heading.style.width = fullwidthContent + 'px';
-                heading.style.maxWidth = fullwidthContent + 'px';
-            }
-
-            game.classList.remove('hidden');
+            recalcFullwidth();
         }
     }
 
-    function recalcIframe() {
+    function recalcFullwidth() {
+
+        const containers = document.querySelectorAll<HTMLElement>('.content-container');
+        const exampleContainer = containers[0];
+        const gameContainer = document.querySelector('.flash-container');
+        const game = document.querySelector('.flash-container iframe');
+
+        if (
+          gameContainer === null ||
+          exampleContainer === undefined ||
+          game === null
+        ) {
+            return false;
+        }
+
+        containers.forEach((container) => {
+            container.style.width = '';
+            container.style.maxWidth = '';
+        })
+
+        var containerWidth = exampleContainer.clientWidth;
+
+        var gameWidth = game.clientWidth;
+        game.classList.add('hidden');
+
+        var gameWidthRendered = gameContainer.clientWidth;
+
+        var differentWidth = gameWidth - gameWidthRendered;
+
+        let fullwidthContent = containerWidth + differentWidth;
+
+        containers.forEach((container) => {
+            container.style.width = fullwidthContent + 'px';
+            container.style.maxWidth = fullwidthContent + 'px';
+        })
+
+        game.classList.remove('hidden');
+    }
+
+    function recalcNormal() {
 
         const flash = document.getElementById('flash-container');
+        if (flash == null) {
+            return;
+        }
+
+        const containers = document.querySelectorAll<HTMLElement>('.content-container');
+        containers.forEach((container) => {
+            container.style.width = '';
+            container.style.maxWidth = '';
+        })
+
         const iframe = flash.querySelector('iframe');
+        if (iframe == null) {
+            return;
+        }
 
         var wHeight = window.innerHeight;
 
-        var initWidth = iframe.getAttribute('width');
-        var initHeight = iframe.getAttribute('height');
+        let initWidth = iframe.clientWidth;
+        let initHeight = iframe.clientHeight;
 
         var newWidth, newHeight, ratio = 0;
 
@@ -183,7 +234,7 @@ const Player = ({ options }) => {
 
         newWidth = flash.offsetWidth;
 
-        ratio = parseInt(initWidth) / parseInt(initHeight);
+        ratio = initWidth / initHeight;
         newHeight = newWidth / ratio;
 
 
@@ -198,8 +249,8 @@ const Player = ({ options }) => {
             newWidth = newHeight * ratio;
         }
 
-        iframe.setAttribute('width', newWidth);
-        iframe.setAttribute('height', newHeight);
+        iframe.setAttribute('width', newWidth.toString());
+        iframe.setAttribute('height', newHeight.toString());
 
         iframe.classList.remove('hidden');
 
@@ -245,3 +296,4 @@ const Player = ({ options }) => {
 };
 
 export default Player;
+/* eslint-enable */

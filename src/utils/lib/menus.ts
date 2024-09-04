@@ -4,10 +4,16 @@ import { IMenu, IMenuItem, IMenuItemsTree } from '@/utils/interfaces/menus';
 import { getClient } from '@/utils/lib/apollo-client';
 import { getTopLevelPages } from '@/utils/lib/pages';
 import { QUERY_ALL_MENUS } from '@/utils/data/menus';
-import { IPage } from '../interfaces/pages';
+import {IPage, IPageCard} from '../interfaces/pages';
+import {IQueryData} from "@/utils/interfaces/commons";
+import appConfig from "@/utils/lib/config";
+import {unstable_noStore} from "next/cache";
 
 export const MENU_LOCATION_NAVIGATION_DEFAULT = 'navmenu';
 
+if (!appConfig.export) {
+    unstable_noStore();
+}
 /**
  * getAllMenus
  */
@@ -23,9 +29,7 @@ export async function getAllMenus() {
 
     const defaultNavigation = createMenuFromPages(
         [MENU_LOCATION_NAVIGATION_DEFAULT],
-        await getTopLevelPages({
-            queryIncludes: 'index',
-        }),
+        await getTopLevelPages(),
     );
 
     menus.push(defaultNavigation);
@@ -39,11 +43,11 @@ export async function getAllMenus() {
  * mapMenuData
  */
 
-export function mapMenuData(menu = {}) {
+export function mapMenuData(menu: IQueryData) {
     const { node } = menu;
     const data = { ...node };
 
-    data.menuItems = data.menuItems.edges.map(({ node }) => {
+    data.menuItems = data.menuItems.edges.map(({ node }: IQueryData) => {
         return { ...node };
     });
 
@@ -54,12 +58,12 @@ export function mapMenuData(menu = {}) {
  * mapPagesToMenuItems
  */
 
-export function mapPagesToMenuItems(pages: Array<IPage>) {
-    return pages.map(({ id, uri, title }: IPage) => {
+export function mapPagesToMenuItems(pages: Array<IPageCard>) {
+    return pages.map(({ pageId, uri, title }: IPageCard) => {
         return {
             label: title,
             path: uri,
-            id,
+            pageId,
         };
     });
 }
@@ -70,7 +74,7 @@ export function mapPagesToMenuItems(pages: Array<IPage>) {
 
 export function createMenuFromPages( 
     locations: Array<string>, 
-    pages: Array<IPage>
+    pages: Array<IPageCard>
 ): IMenu {
     return {
         id: 'defaultpages',
@@ -86,24 +90,34 @@ export function createMenuFromPages(
  * @param param1 object of keys
  * @returns Hierarchical tree of menu
  */
+
 export const parseHierarchicalMenu = (
-    data: Array<object> = [],
-    {
-        idKey = 'id',
-        parentKey = 'parentId',
-        childrenKey = 'children'
-    } = {}
+    data: IQueryData = []
 ): IMenuItemsTree => {
     const tree: Array<IMenuItem> = [];
-    const childrenOf = {};
+    const childrenOf: {[propName: string]: any;} = {};
 
-    data.forEach((item) => {
-        const newItem = { ...item };
-        const { [idKey]: id, [parentKey]: parentId = 0 } = newItem;
+    data.forEach((item: IMenuItem) => {
+        // create copy of item
+        const newItem: IMenuItem = { ...item };
+
+        // desctruct id and parent id from item
+        const {
+            id,
+            parentId = 0
+        } = newItem;
+
+        // initialize array of children elements (if not exist)
         childrenOf[id] = childrenOf[id] || [];
-        newItem[childrenKey] = childrenOf[id];
+
+        // Add children field for newItem
+        newItem['children'] = childrenOf[id];
+
+        // add children node for new item if parent id exist
+        // else add node for root array "tree"
         parentId ? (childrenOf[parentId] = childrenOf[parentId] || []).push(newItem) : tree.push(newItem);
     });
+
     return tree;
 };
 

@@ -12,7 +12,8 @@ type TContentBoxProps = {
 const ContentBox = ({ children, className }: TContentBoxProps) => {
     const contentClassName = new ClassName(styles.contentBox);
 
-    contentClassName.addIf(className, className);
+    contentClassName.addIf(className);
+    contentClassName.addIf('content');
 
     return (
         <section className= { contentClassName.toString() } >

@@ -1,4 +1,5 @@
 @use "vars/base" as vars;
+@use "vars/mixins";
 
 .content {
   h1,
@@ -17,26 +18,36 @@
   }
 
   h1 {
-    font-size: 1.571rem;
+    font-size: 2rem;
   }
 
   h2 {
-    font-size: 1.571rem;
+    font-size: 1.8rem;
   }
 
   h3 {
-    font-size: 1.3rem;
+    font-size: 1.6rem;
   }
 
+  h4 {
+    font-size: 1.4rem;
+  }
+
+  h5 {
+    font-size: 1.2rem;
+  }
+
+  h6 {
+    font-size: 1.1rem;
+  }
+
+  h1,
   h2,
-  h3 {
-    margin-bottom: 20px;
-  }
-
+  h3,
   h4,
   h5,
   h6 {
-    margin-bottom: 14px;
+    margin-bottom: 1.5rem;
   }
 
   p {
@@ -44,48 +55,11 @@
   }
 
   ul:not([class]) {
-    list-style: none;
-    margin: 0 0 2rem;
-    padding: 0 0 0 20px;
-
-    li {
-      list-style-type: none;
-      padding: 0 0 10px 20px;
-      text-decoration: none;
-      position: relative;
-
-      &::before {
-        content: "";
-        position: absolute;
-        top: 9px;
-        left: 0;
-        width: 7px;
-        height: 7px;
-        background: var(--app-color-accent);
-      }
-    }
+    @include mixins.content-ul;
   }
 
   ol:not([class]) {
-    counter-reset: list 1;
-    padding-left: 1rem;
-
-    li {
-      list-style: none;
-      padding: 0 0 0 30px;
-      margin-bottom: 10px;
-      position: relative;
-
-      &::before {
-        counter-increment: list;
-        content: counter(list) ". ";
-        color: var(--app-color-accent);
-        position: absolute;
-        top: 0;
-        left: 15px;
-        font-weight: 500;
-      }
-    }
+    @include mixins.content-ol;
   }
 
   pre {
@@ -115,6 +89,14 @@
     display: block;
     max-width: 100%;
     height: auto;
+  }
+
+  a:not([class]) {
+    color: var(--app-color-link);
+
+    &:hover {
+      text-decoration: none;
+    }
   }
 
   *:first-child {

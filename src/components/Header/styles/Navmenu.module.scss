@@ -1,4 +1,6 @@
+@use "vars/base";
 @use "vars/media";
+@use "vars/mixins";
 @use "sass:color";
 
 .navmenu {
@@ -44,6 +46,14 @@
         }
       }
     }
+
+    &.button {
+      a {
+        border-radius: base.$border-radius-base;
+
+        @include mixins.gradient-accent;
+      }
+    }
   }
 
   a {
@@ -53,7 +63,7 @@
     text-decoration: none;
     line-height: 1;
     padding: 5px 15px;
-    text-transform: uppercase;
+    text-transform: none;
 
     &:hover,
     &:focus,

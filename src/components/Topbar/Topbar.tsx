@@ -5,31 +5,32 @@ import Link from 'next/link';
 import Container from '@/components/Container';
 
 import styles from './styles/Topbar.module.scss';
+import {IMenu, IMenuItemsTree} from "@/utils/interfaces/menus";
+import ClassName from "@/utils/models/classname";
+import Navmenu from "@/components/Header/Navmenu";
+import Topnav from "@/components/Topbar/Topnav";
+import {getMenusContext} from "@/utils/hooks/ServerContext";
+import {findMenuByLocation} from "@/utils/lib/menus";
+
+type TTopbarProps = {
+    className?: string,
+}
 
 /**
  * Navigation for the application.
  * Includes mobile menu.
  */
-const Topbar = () => {
+const Topbar = ({className}: TTopbarProps) => {
+    const topbarClassName = new ClassName([styles.topbar]);
+    topbarClassName.addIf(className);
+
+    const menus: Array<IMenu> = getMenusContext();
+    const topnav = findMenuByLocation(menus, 'topbar');
+
     return (
         <nav className={styles.topbar}>
             <Container>
-                <ul className={styles.topnav}>
-                    <li>
-                        <Link href="/produkter">
-                            <span className="">
-                                Produkter
-                            </span>
-                        </Link>
-                    </li>
-                    <li>
-                        <Link href="/kategorier">
-                            <span className="">
-                                Kategorier
-                            </span>
-                        </Link>
-                    </li>
-                </ul>
+                <Topnav menu={topnav}/>
             </Container>
         </nav>
     );

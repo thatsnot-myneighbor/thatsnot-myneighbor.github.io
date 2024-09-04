@@ -13,19 +13,10 @@ import {
   QUERY_POST_PER_PAGE,
 } from '@/utils/data/posts';
 import {IPost, IPostCard} from "@/utils/interfaces/posts";
-import {unstable_noStore} from "next/cache";
-import {IQueryData} from "@/utils/interfaces/commons";
 import appConfig from "@/utils/lib/config";
 import {ICategoryCard} from "@/utils/interfaces/categories";
-import {mapCategoryData} from "@/utils/lib/categories";
-
-/**
- * postPathBySlug
- */
-
-export function postPathBySlug(slug: string) {
-  return `/games/${slug}`;
-}
+import {mapCategoryData} from "@/utils/helpers/categories";
+import {mapPostData, mapPostCardData} from "@/utils/helpers/posts";
 
 /**
  * getPostBySlug
@@ -77,8 +68,10 @@ export async function getPostBySlug(slug: string) {
 
     const {seo = {}} = seoData?.data?.post || {};
 
-    post.metaTitle = seo.title;
-    post.metaDescription = seo.metaDesc;
+    post.seo = {
+      title: seo.title,
+      description: seo.metaDesc,
+    };
 
     // The SEO plugin by default includes a canonical link, but we don't want to use that
     // because it includes the WordPress host, not the site host. We manage the canonical
@@ -86,10 +79,10 @@ export async function getPostBySlug(slug: string) {
     // in here by looking for the API's host in the provided canonical link
 
     if (seo.canonical && !seo.canonical.includes(apiHost)) {
-      post.canonical = seo.canonical;
+      post.seo.canonical = seo.canonical;
     }
 
-    post.og = {
+    post.seo.og = {
       author: seo.opengraphAuthor,
       description: seo.opengraphDescription,
       image: seo.opengraphImage,
@@ -100,19 +93,19 @@ export async function getPostBySlug(slug: string) {
       type: seo.opengraphType,
     };
 
-    post.article = {
-      author: post.og.author,
-      modifiedTime: post.og.modifiedTime,
-      publishedTime: post.og.publishedTime,
-      publisher: post.og.publisher,
+    post.seo.article = {
+      author: post.seo.og.author,
+      modifiedTime: post.seo.og.modifiedTime,
+      publishedTime: post.seo.og.publishedTime,
+      publisher: post.seo.og.publisher,
     };
 
-    post.robots = {
+    post.seo.robots = {
       nofollow: seo.metaRobotsNofollow,
       noindex: seo.metaRobotsNoindex,
     };
 
-    post.twitter = {
+    post.seo.twitter = {
       description: seo.twitterDescription,
       image: seo.twitterImage,
       title: seo.twitterTitle,
@@ -124,7 +117,7 @@ export async function getPostBySlug(slug: string) {
   };
 }
 
-export async function getAllPosts(options = {}) {
+export async function getAllPosts(options = {}): Promise<IPostCard[]> {
   const apolloClient = getClient();
 
   const data = await apolloClient.query({
@@ -134,29 +127,9 @@ export async function getAllPosts(options = {}) {
 
   const posts = data?.data.posts.edges.map(({node = {}}) => node);
 
-  return {
-    posts: Array.isArray(posts) && posts.map(mapPostCardData),
-  };
+  return posts.map(mapPostCardData);
 }
 
-
-/**
- * Get top posts
- */
-
-export async function getTopPosts() {
-  const apolloClient = getClient();
-
-  const data = await apolloClient.query({
-    query: QUERY_TOP_POSTS,
-  });
-
-  const posts = data?.data.posts.edges.map(({node = {}}) => node);
-
-  return {
-    topPosts: Array.isArray(posts) && posts.map(mapPostCardData),
-  };
-}
 
 /**
  * Get side posts
@@ -181,7 +154,7 @@ export async function getSidePosts() {
  * getPostsByCategoryId
  */
 
-export async function getPostsByCategoryId(categoryId: string) {
+export async function getPostsByCategoryId(categoryId: string): Promise<IPostCard[]> {
   const apolloClient = getClient();
 
   let postData;
@@ -202,9 +175,7 @@ export async function getPostsByCategoryId(categoryId: string) {
 
   const posts = postData?.data.posts.edges.map(({node = {}}) => node);
 
-  return {
-    posts: Array.isArray(posts) && posts.map(mapPostCardData),
-  };
+  return posts.map(mapPostCardData);
 }
 
 /**
@@ -212,7 +183,7 @@ export async function getPostsByCategoryId(categoryId: string) {
  */
 
 export async function getPaginatedPostsByCategoryId(categoryId: string, currentPage: number = 1) {
-  const {posts} = await getPostsByCategoryId(categoryId);
+  const posts = await getPostsByCategoryId(categoryId);
   const postsPerPage = await getPostsPerPage();
   const pagesCount = await getPagesCount(posts, postsPerPage);
 
@@ -237,6 +208,7 @@ export async function getPaginatedPostsByCategoryId(categoryId: string, currentP
     pagination: {
       currentPage: page,
       pagesCount,
+      basePath: '/'
     },
   };
 }
@@ -246,147 +218,21 @@ export async function getPaginatedPostsByCategoryId(categoryId: string, currentP
  * getRecentPosts
  */
 
-export async function getRecentPosts({count, ...options}) {
-  const {posts} = await getAllPosts(options);
+export async function getRecentPosts({count, ...options}: {count: number}) {
+  const posts = await getAllPosts(options);
   const sorted = sortObjectsByDate(posts);
   return {
     posts: sorted.slice(0, count),
   };
 }
 
-/**
- * sanitizeExcerpt
- */
-
-export function sanitizeExcerpt(excerpt) {
-  if (typeof excerpt !== 'string') {
-    throw new Error(`Failed to sanitize excerpt: invalid type ${typeof excerpt}`);
-  }
-
-  let sanitized = excerpt;
-
-  // If the theme includes [...] as the more indication, clean it up to just ...
-
-  sanitized = sanitized.replace(/\s?\[&hellip;\]/, '&hellip;');
-
-  // If after the above replacement, the ellipsis includes 4 dots, it's
-  // the end of a setence
-
-  sanitized = sanitized.replace('....', '.');
-  sanitized = sanitized.replace('.&hellip;', '.');
-
-  // If the theme is including a "Continue..." link, remove it
-
-  sanitized = sanitized.replace(/\w*<a class="more-link".*<\/a>/, '');
-
-  return sanitized;
-}
-
-/**
- * Build Post card data
- */
-export function mapPostCardData(postData: IQueryData = {}): IPostCard {
-  const {
-    databaseId,
-    slug,
-    title,
-    categories,
-    featuredImage,
-    isSticky,
-    likes
-  } = postData;
-
-  const post = {
-    postId: databaseId,
-    slug: slug,
-    title: title,
-    categories: [],
-    featuredImage: {},
-    isSticky: isSticky,
-    likes: {
-      up: likes.up,
-      down: likes.down,
-    }
-  }
-
-  // Clean up the categories to make them more easy to access
-  if (postData.categories) {
-    post.categories = categories.edges.map(({node}) => {
-      return {
-        ...node,
-      };
-    });
-  }
-
-  // Clean up the featured image to make them more easy to access
-
-  if (postData.featuredImage) {
-    post.featuredImage = featuredImage.node;
-  }
-
-  return post;
-}
-
-/**
- * Build single post data
- */
-
-export function mapPostData(postData: IQueryData = {}): IPost {
-  const {
-    databaseId,
-    slug,
-    title,
-    metaTitle,
-    description,
-    content,
-    categories,
-    csOptionsPost,
-    featuredImage,
-    isSticky,
-    likes
-  } = postData;
-
-  const post = {
-    postId: databaseId,
-    slug: slug,
-    title: title,
-    metaTitle: metaTitle,
-    description: description,
-    content: content,
-    categories: [],
-    csOptionsPost: csOptionsPost,
-    featuredImage: {},
-    isSticky: isSticky,
-    likes: {
-      up: likes.up,
-      down: likes.down,
-    }
-  }
-
-  // Clean up the categories to make them more easy to access
-  if (postData.categories) {
-    post.categories = categories.edges.map(({node}) => {
-      return {
-        ...node,
-      };
-    });
-  }
-
-  // Clean up the featured image to make them more easy to access
-
-  if (postData.featuredImage) {
-    post.featuredImage = featuredImage.node;
-  }
-
-  return post;
-}
 
 /**
  * getRelatedPosts
  */
 
 export async function getRelatedPosts(
-  categories: ICategoryCard[],
+  categories: ICategoryCard[] | undefined,
   postId: string,
   count = 5
 ) {
@@ -398,7 +244,7 @@ export async function getRelatedPosts(
   };
 
   if (related.category) {
-    const {posts} = await getPostsByCategoryId(
+    const posts = await getPostsByCategoryId(
       related.category.id,
     );
 
@@ -481,7 +327,7 @@ export async function getPagesCount(
  * getPaginatedPosts
  */
 export async function getPaginatedPosts(currentPage: number = 1) {
-  const {posts} = await getAllPosts();
+  const posts = await getAllPosts();
   const postsPerPage = await getPostsPerPage();
   const pagesCount = await getPagesCount(posts, postsPerPage);
 
