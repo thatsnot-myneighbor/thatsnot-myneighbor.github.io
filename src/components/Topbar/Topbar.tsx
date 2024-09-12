@@ -1,6 +1,3 @@
-// Imports
-import Link from 'next/link';
-
 // Components
 import Container from '@/components/Container';
 

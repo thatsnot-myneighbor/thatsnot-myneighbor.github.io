@@ -8,6 +8,8 @@ import {unstable_noStore} from "next/cache";
 import {Metadata} from "next";
 import appConfig from "@/utils/lib/config";
 import {getCategoryBySlug} from "@/utils/lib/categories";
+import Player from "@/components/Player";
+import PlayerHome from "@/components/PlayerHome/PlayerHome";
 
 export const metadata: Metadata = {
   title: "",
@@ -34,8 +36,15 @@ export default async function Home() {
     metadata.description = page.seo.description;
   }
 
+  const defaultPlayer = {
+    flashFullwidth: true,
+    flashIframe: '',
+  }
+
   return (
     <div className="page">
+
+      <PlayerHome />
 
       <Section
         title="All games"

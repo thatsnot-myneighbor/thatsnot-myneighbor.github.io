@@ -3,9 +3,7 @@ import {IPostCard} from '@/utils/interfaces/posts';
 import {postPathBySlug} from '@/utils/helpers/posts';
 
 import FeaturedImage from '@/components/FeaturedImage';
-
 import styles from './styles/PostCard.module.scss';
-import featuredImage from "@/components/FeaturedImage";
 
 const PostCard = ({post, options = {}}: { post: IPostCard, options?: {} }) => {
   const {title, slug, featuredImage, isSticky = false} = post;
@@ -42,7 +40,6 @@ const PostCard = ({post, options = {}}: { post: IPostCard, options?: {} }) => {
         {isSticky && <i className="postCard__sticky-icon"></i>}
         {featuredImage && (
           <FeaturedImage
-            {...featuredImage}
             src={postThumbnailUrl}
             dangerouslySetInnerHTML={featuredImage.caption}
             width="240"

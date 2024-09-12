@@ -8,9 +8,6 @@ import Sidebar from '../Sidebar/Sidebar';
 import Container from '../Container';
 import TopGames from "@/components/TopGames";
 
-// import Sidebar from 'components/Sidebar';
-// import Footer from 'components/Footer';
-
 interface ILayoutProps {
   children: React.ReactNode;
 }
