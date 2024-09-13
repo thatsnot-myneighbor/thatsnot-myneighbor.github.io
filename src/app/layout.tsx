@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import '@/styles/globals.scss';
 import {getAllMenus} from '@/utils/lib/menus';
 import {getSiteoptions} from "@/utils/lib/siteoptions";
+import { GoogleTagManager } from '@next/third-parties/google';
 
 // components
 import Layout from '@/components/Layout';
@@ -16,6 +17,7 @@ import {getSidePosts} from "@/utils/lib/posts";
 import {ApolloWrapper} from "@/components/ApolloWrapper";
 import {NavbarProvider} from "@/utils/hooks/NavbarProvider";
 import NextTopLoader from 'nextjs-toploader';
+import Head from "next/head";
 
 const {menus = []} = await getAllMenus();
 const settings = await getSiteoptions();
@@ -40,6 +42,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+    <GoogleTagManager gtmId="G-KMEPNP0KS0"/>
     <body>
     <NavbarProvider>
       <ApolloWrapper>
