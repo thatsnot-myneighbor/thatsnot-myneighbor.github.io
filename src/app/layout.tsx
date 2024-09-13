@@ -2,7 +2,7 @@ import type {Metadata} from "next";
 import '@/styles/globals.scss';
 import {getAllMenus} from '@/utils/lib/menus';
 import {getSiteoptions} from "@/utils/lib/siteoptions";
-import { GoogleTagManager } from '@next/third-parties/google';
+import {GoogleTagManager} from '@next/third-parties/google';
 
 // components
 import Layout from '@/components/Layout';
@@ -17,7 +17,7 @@ import {getSidePosts} from "@/utils/lib/posts";
 import {ApolloWrapper} from "@/components/ApolloWrapper";
 import {NavbarProvider} from "@/utils/hooks/NavbarProvider";
 import NextTopLoader from 'nextjs-toploader';
-import Head from "next/head";
+import Livecounter from "@/components/LiveCounter";
 
 const {menus = []} = await getAllMenus();
 const settings = await getSiteoptions();
@@ -32,8 +32,8 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: Readonly<{
   children: React.ReactNode;
 }>) {
   setMenusContext(menus);
@@ -55,6 +55,7 @@ export default function RootLayout({
         </Layout>
       </ApolloWrapper>
     </NavbarProvider>
+    <Livecounter/>
     </body>
     </html>
   );
