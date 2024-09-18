@@ -21,7 +21,7 @@ const Layout: React.FC<ILayoutProps> = ({children}) => {
       <div className={styles.layout__top}>
         <Topbar/>
 
-        <Header title={"AppName"}/>
+        <Header/>
 
         <Container>
           <TopGames/>
